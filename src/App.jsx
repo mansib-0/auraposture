@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ShoppingCart, ShieldCheck, Truck, Zap, Activity, Battery, CheckCircle, X } from 'lucide-react';
+import { ShoppingCart, ShieldCheck, Truck, Zap, Activity, Battery, CheckCircle, X, Check } from 'lucide-react';
 import './index.css';
 
 function App() {
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState('idle'); // 'idle', 'submitting', 'success'
   
   // Checkout Form State
   const [formData, setFormData] = useState({
@@ -17,16 +18,45 @@ function App() {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
 
-  const submitOrder = (e) => {
+  const submitOrder = async (e) => {
     e.preventDefault();
-    // Format the WhatsApp Message
-    const text = `*New Order - AuraPosture*%0A%0A*Name:* ${formData.name}%0A*Phone:* ${formData.phone}%0A*Address:* ${formData.address}%0A*Product:* Smart Posture Corrector (৳1,490)%0A*Payment Method:* Cash on Delivery`;
+    setFormStatus('submitting');
     
-    // Replace with the user's actual WhatsApp number (e.g., 8801700000000)
-    const whatsappNumber = "8801000000000"; 
+    // Web3Forms API Integration
+    // Replace this string with your actual access key from web3forms.com
+    const ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY_HERE";
     
-    window.open(`https://wa.me/${whatsappNumber}?text=${text}`, '_blank');
+    const data = new FormData();
+    data.append("access_key", ACCESS_KEY);
+    data.append("subject", "🚨 NEW COD ORDER: AuraPosture BD");
+    data.append("Customer Name", formData.name);
+    data.append("Phone Number", formData.phone);
+    data.append("Full Address", formData.address);
+    data.append("Product", "Smart Posture Corrector (৳1,490)");
+    data.append("Payment", "Cash on Delivery");
+    
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: data
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        setFormStatus('success');
+      } else {
+        alert("Something went wrong. Please check your internet connection.");
+        setFormStatus('idle');
+      }
+    } catch (error) {
+      alert("Error submitting the order. Please try again.");
+      setFormStatus('idle');
+    }
+  };
+
+  const closeModal = () => {
     setIsModalOpen(false);
+    setTimeout(() => setFormStatus('idle'), 500); // Reset form status after modal closes
   };
 
   return (
@@ -147,36 +177,54 @@ function App() {
           </div>
         </section>
 
-        {/* Checkout Modal */}
+        {/* Secure Checkout Modal */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content glass-panel">
-              <button className="close-modal" onClick={() => setIsModalOpen(false)}>
+              <button className="close-modal" onClick={closeModal}>
                 <X size={24} />
               </button>
-              <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Complete Your Order</h3>
-              <p style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                Please provide your delivery details. You will pay <strong>৳1,490</strong> via Cash on Delivery when the courier arrives.
-              </p>
               
-              <form onSubmit={submitOrder} className="checkout-form">
-                <div className="form-group">
-                  <label>Full Name (আপনার নাম)</label>
-                  <input type="text" name="name" required placeholder="e.g. Rahim Rahman" onChange={handleInputChange} />
+              {formStatus === 'success' ? (
+                <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', marginBottom: '1.5rem' }}>
+                    <Check size={32} />
+                  </div>
+                  <h3 style={{ marginBottom: '1rem', color: '#4ade80' }}>Order Confirmed!</h3>
+                  <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>
+                    Thank you, {formData.name}. Your order has been securely received. We will call you shortly to confirm delivery!
+                  </p>
+                  <button onClick={closeModal} className="btn btn-primary" style={{ width: '100%' }}>
+                    Back to Store
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Phone Number (মোবাইল নাম্বার)</label>
-                  <input type="tel" name="phone" required placeholder="01XXXXXXXXX" onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Full Delivery Address (সম্পূর্ণ ঠিকানা)</label>
-                  <textarea name="address" required placeholder="House, Road, Area, City" rows="3" onChange={handleInputChange}></textarea>
-                </div>
-                
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
-                  Confirm Order via WhatsApp
-                </button>
-              </form>
+              ) : (
+                <>
+                  <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Secure Checkout 🔒</h3>
+                  <p style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                    Please provide your delivery details. You will pay <strong>৳1,490</strong> via Cash on Delivery when the courier arrives.
+                  </p>
+                  
+                  <form onSubmit={submitOrder} className="checkout-form">
+                    <div className="form-group">
+                      <label>Full Name (আপনার নাম)</label>
+                      <input type="text" name="name" required placeholder="e.g. Rahim Rahman" onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone Number (মোবাইল নাম্বার)</label>
+                      <input type="tel" name="phone" required placeholder="01XXXXXXXXX" onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Full Delivery Address (সম্পূর্ণ ঠিকানা)</label>
+                      <textarea name="address" required placeholder="House, Road, Area, City" rows="3" onChange={handleInputChange}></textarea>
+                    </div>
+                    
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', opacity: formStatus === 'submitting' ? 0.7 : 1 }} disabled={formStatus === 'submitting'}>
+                      {formStatus === 'submitting' ? 'Processing...' : 'Confirm Secure Order'}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         )}
