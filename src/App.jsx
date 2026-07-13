@@ -1,9 +1,33 @@
 import React, { useState } from 'react';
-import { ShoppingCart, ShieldCheck, Truck, Zap, Activity, Battery, CheckCircle } from 'lucide-react';
+import { ShoppingCart, ShieldCheck, Truck, Zap, Activity, Battery, CheckCircle, X } from 'lucide-react';
 import './index.css';
 
 function App() {
   const [isHovered, setIsHovered] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Checkout Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    address: ''
+  });
+
+  const handleInputChange = (e) => {
+    setFormData({...formData, [e.target.name]: e.target.value});
+  };
+
+  const submitOrder = (e) => {
+    e.preventDefault();
+    // Format the WhatsApp Message
+    const text = `*New Order - AuraPosture*%0A%0A*Name:* ${formData.name}%0A*Phone:* ${formData.phone}%0A*Address:* ${formData.address}%0A*Product:* Smart Posture Corrector (৳1,490)%0A*Payment Method:* Cash on Delivery`;
+    
+    // Replace with the user's actual WhatsApp number (e.g., 8801700000000)
+    const whatsappNumber = "8801000000000"; 
+    
+    window.open(`https://wa.me/${whatsappNumber}?text=${text}`, '_blank');
+    setIsModalOpen(false);
+  };
 
   return (
     <>
@@ -11,10 +35,10 @@ function App() {
         <nav>
           <a href="#" className="logo">
             <Activity color="#2563eb" />
-            <span>AuraPosture</span>
+            <span>AuraPosture BD</span>
           </a>
-          <button className="btn btn-primary" style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
-            Buy Now
+          <button onClick={() => setIsModalOpen(true)} className="btn btn-primary" style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
+            অর্ডার করুন
           </button>
         </nav>
       </header>
@@ -26,30 +50,29 @@ function App() {
           <div className="container hero-content">
             <div className="hero-text">
               <div style={{ display: 'inline-block', padding: '0.25rem 1rem', background: 'rgba(37, 99, 235, 0.1)', color: '#60a5fa', borderRadius: '999px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                🌟 10,000+ Happy Customers
+                🚚 ক্যাশ অন ডেলিভারি সারা বাংলাদেশে
               </div>
               <h1>Stop Slouching. Start Living.</h1>
               <p>
                 The Smart Posture Corrector gently trains your muscles to maintain perfect alignment, eliminating back pain and boosting your confidence—all with a discreet, intelligent design.
               </p>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <a 
-                  href="#checkout" 
+                <button 
+                  onClick={() => setIsModalOpen(true)}
                   className="btn btn-primary"
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                 >
                   <ShoppingCart size={20} style={{ marginRight: '0.5rem' }} />
-                  Claim 50% Off Today
-                </a>
-                <span style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-                  Only $39.99 <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>$79.99</span>
+                  Order Now (Cash on Delivery)
+                </button>
+                <span style={{ color: '#94a3b8', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                  ৳1,490 <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.875rem', fontWeight: 'normal' }}>৳2,500</span>
                 </span>
               </div>
             </div>
             
             <div className="hero-image glass-panel" style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)' }}>
-              {/* Placeholder for the actual product image. We use a sleek abstract representation or an unspalsh image */}
               <img 
                 src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1000&auto=format&fit=crop" 
                 alt="Smart Posture Corrector in use" 
@@ -67,15 +90,15 @@ function App() {
         <div className="trust-bar">
           <div className="trust-item">
             <ShieldCheck size={24} color="#60a5fa" />
-            <span>30-Day Money Back Guarantee</span>
+            <span>১০০% কোয়ালিটি গ্যারান্টি</span>
           </div>
           <div className="trust-item">
             <Truck size={24} color="#60a5fa" />
-            <span>Free Worldwide Shipping</span>
+            <span>সারা বাংলাদেশে হোম ডেলিভারি</span>
           </div>
           <div className="trust-item">
             <CheckCircle size={24} color="#60a5fa" />
-            <span>Medical Grade Materials</span>
+            <span>প্রোডাক্ট হাতে পেয়ে টাকা দিন</span>
           </div>
         </div>
 
@@ -117,13 +140,46 @@ function App() {
         <section className="container" style={{ textAlign: 'center', paddingBottom: '6rem' }}>
           <div className="glass-panel" style={{ padding: '4rem 2rem', background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(15, 23, 42, 0) 100%)' }}>
             <h2 style={{ marginBottom: '1rem' }}>Ready to stand taller?</h2>
-            <p style={{ marginBottom: '2rem' }}>Join 10,000+ others living pain-free.</p>
-            <a href="#checkout" className="btn btn-primary" style={{ transform: 'scale(1.1)' }}>
-              Get Yours For $39.99
-            </a>
-            <p style={{ marginTop: '1rem', fontSize: '0.875rem' }}>Sale ends at midnight.</p>
+            <p style={{ marginBottom: '2rem' }}>Order today and pay when the product reaches your door.</p>
+            <button onClick={() => setIsModalOpen(true)} className="btn btn-primary" style={{ transform: 'scale(1.1)' }}>
+              Order Now - ৳1,490
+            </button>
           </div>
         </section>
+
+        {/* Checkout Modal */}
+        {isModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content glass-panel">
+              <button className="close-modal" onClick={() => setIsModalOpen(false)}>
+                <X size={24} />
+              </button>
+              <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Complete Your Order</h3>
+              <p style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                Please provide your delivery details. You will pay <strong>৳1,490</strong> via Cash on Delivery when the courier arrives.
+              </p>
+              
+              <form onSubmit={submitOrder} className="checkout-form">
+                <div className="form-group">
+                  <label>Full Name (আপনার নাম)</label>
+                  <input type="text" name="name" required placeholder="e.g. Rahim Rahman" onChange={handleInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Phone Number (মোবাইল নাম্বার)</label>
+                  <input type="tel" name="phone" required placeholder="01XXXXXXXXX" onChange={handleInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Full Delivery Address (সম্পূর্ণ ঠিকানা)</label>
+                  <textarea name="address" required placeholder="House, Road, Area, City" rows="3" onChange={handleInputChange}></textarea>
+                </div>
+                
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+                  Confirm Order via WhatsApp
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
